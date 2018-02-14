@@ -10,6 +10,7 @@ module.exports = {
 
     var userEmail = requestBody.emailAddress;
     var userPassword = requestBody.password;
+    var userMobile = '';
     var userRole = 'user';
     var isUserRoleValid = true;
     var regxFormat = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
@@ -31,6 +32,16 @@ module.exports = {
       //by default its a user
     }
 
+    if (requestBody.hasOwnProperty('mobile')) {
+      userMobile = requestBody.mobile;
+    } else {}
+
+    //Generate a random password if there is no password
+    if (!userPassword || userPassword.indexOf(' ') >= 0) {
+      var userPass = Math.random().toString(36).slice(-8);
+      userPassword = userPass.concat('*');
+    }else {}
+
     if (!userEmail || userEmail.indexOf(' ') >= 0) {
       // if emailAddress is not passesed with the request
       responseArray[0] = '400';
@@ -48,12 +59,7 @@ module.exports = {
       callback(responseArray);
     }else {
 
-      //Generate a random password if there is no password
-      if (!userPassword || userPassword.indexOf(' ') >= 0) {
-        userPassword = Math.random().toString(36).slice(-8);
-      }else {}
-
-      var userDetail = { email: userEmail, password: userPassword, role: userRole };
+      var userDetail = { email: userEmail, password: userPassword, role: userRole, mobile: userMobile};
 
       db.collection('users').findOne({ email: userEmail }, function (err, result) {
         if (result) {
@@ -74,7 +80,7 @@ module.exports = {
               //console.log(result.ops[0]._id);
               console.log(JSON.stringify(result.ops[0]));
               responseArray[0] = '201';
-              responseArray[1] = '{\n\t"self": "http://localhost:8090/api/users/' + result.ops[0]._id + '",\n\t"emailAddress": "' + result.ops[0].email + '",\n\t"role": "' + result.ops[0].role + '"\n}';
+              responseArray[1] = '{\n\t"self": "http://localhost:8090/api/users/' + result.ops[0]._id + '",\n\t"emailAddress": "' + result.ops[0].email + '",\n\t"role": "' + result.ops[0].role + '"\n\t"mobile": "' + result.ops[0].mobile + '"\n}';
               callback(responseArray);
             }
           });
